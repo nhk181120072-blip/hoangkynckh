@@ -214,8 +214,8 @@ elif choice == "🤖 Trợ lý AI":
     st.header("🤖 Trợ lý AI Cố vấn Học tập (Real-time AI)")
     st.info("🚀 Hệ thống sử dụng hạ tầng LPU của Groq để phản hồi siêu tốc.")
     
-    # Nhập mã gsk_...
-    groq_key = st.text_input("🔑 Nhập Groq API Key:", type="password")
+    # CHỈ SỬA KHÚC NÀY: Lấy key bảo mật từ Streamlit Secrets thay vì dùng st.text_input
+    groq_key = st.secrets.get("GROQ_API_KEY") if "GROQ_API_KEY" in st.secrets else None
     
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -230,12 +230,11 @@ elif choice == "🤖 Trợ lý AI":
             st.markdown(prompt)
         
         with st.chat_message("assistant"):
-            if groq_key:
+            if groq_key:  # Nếu đã cấu hình key ngầm thành công
                 try:
                     from groq import Groq
-                    client = Groq(api_key=groq_key)
+                    client = Groq(api_key=groq_key)  # Truyền key bí mật vào đây
                     
-                    # Gọi mô hình Llama 3 - Con AI cực kỳ thông minh của Meta
                     chat_completion = client.chat.completions.create(
                         messages=[
                             {
@@ -251,9 +250,9 @@ elif choice == "🤖 Trợ lý AI":
                     )
                     reply = chat_completion.choices[0].message.content
                 except Exception as e:
-                    reply = f"❌ Lỗi: {str(e)}"
+                    reply = f"❌ Lỗi kết nối AI: {str(e)}"
             else:
-                reply = "⚠️ Vui lòng nhập Groq API Key để kích hoạt AI thực tế."
+                reply = "⚠️ Lỗi: Hệ thống chưa được cấu hình API Key bảo mật. Vui lòng kiểm tra lại thiết lập App Secrets."
             
             st.markdown(reply)
             st.session_state.messages.append({"role": "assistant", "content": reply})
